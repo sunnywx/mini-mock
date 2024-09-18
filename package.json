@@ -1,5 +1,5 @@
 {
-  "name": "amplify-next-pages-template",
+  "name": "mini-mock",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,7 +15,16 @@
     "next": "14.1.4",
     "react": "^18",
     "react-dom": "^18",
-    "react-use": "^17.5.1"
+    "react-use": "^17.5.1",
+    "react-loader-spinner": "^5.1.7-beta.1",
+    "axios": "^0.27.2",
+    "react-tabs": "^5.1.0",
+    "uuid": "^8.3.2",
+    "@codemirror/basic-setup": "^0.18.2",
+    "@codemirror/commands": "^0.18.3",
+    "@codemirror/lang-json": "^0.18.0",
+    "@codemirror/view": "^0.18.17",
+    "pretty-bytes": "^5.6.0"
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.0.4",
@@ -31,6 +40,9 @@
     "eslint-config-next": "14.1.4",
     "sass": "^1.79.1",
     "tsx": "^4.7.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.8"
   }
 }
