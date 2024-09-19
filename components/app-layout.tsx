@@ -1,13 +1,9 @@
 import {
   Flex,
-  Box,
   Text,
-  DropdownMenu,
   Button,
-  Avatar,
 } from "@radix-ui/themes";
 import { ReactNode, useEffect, useMemo, useState } from "react";
-import { useUpdateEffect } from "react-use";
 import styles from "./styles.module.scss";
 import Link from "next/link";
 import cs from "classnames";
@@ -31,13 +27,13 @@ function TopNav({ signOut, user }: { signOut: any; user: any }) {
   const router = useRouter();
   const [activeUrl, setActiveUrl] = useState("/");
 
-  useEffect(() => {
-    setActiveUrl(location.pathname);
-  }, []);
+  // useEffect(() => {
+  //   setActiveUrl(location.pathname);
+  // }, []);
 
-  useUpdateEffect(() => {
-    setActiveUrl(router.pathname);
-  }, [router.pathname]);
+  // useUpdateEffect(() => {
+  //   setActiveUrl(router.pathname);
+  // }, [router.pathname]);
 
   return (
     <>
@@ -92,6 +88,7 @@ function TopNav({ signOut, user }: { signOut: any; user: any }) {
         <div className={styles.profile}>
           <span>{user?.signInDetails?.loginId}</span>
           <Button
+            variant="ghost"
             className={styles.userInfo}
             style={{ display: "flex", alignItems: "center" }}
             onClick={signOut}
@@ -111,20 +108,15 @@ function TopNav({ signOut, user }: { signOut: any; user: any }) {
 }
 
 export default function Layout({ children }: Props) {
-  // const [auth, setAuth] = useState<any>(null);
-
   return (
-    <Flex align="center" direction="column" className={styles.homePage}>
+    <Flex align="center" direction="column" className={styles.page}>
       <Authenticator>
         {({ signOut, user }) => (
           <>
             <TopNav signOut={signOut} user={user} />
-            <Box
-              width="100%"
-              // style={{height: 'calc(100vh - var(--app-header-h))'}}
-            >
+            <div className={styles.cont}>
               {children}
-            </Box>
+            </div>
           </>
         )}
       </Authenticator>

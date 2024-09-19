@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 
-import Layout from '@/components/postman/components/Layout/Layout';
-import Request from '@/components/postman/components/Workspace/Request/RequestPanel';
-import Response from '@/components/postman/components/Workspace/Response/ResponsePanel';
+import Layout from '@/components/postman/Layout';
+import Request from '@/components/postman/Workspace/RequestPanel';
+import Response from '@/components/postman/Workspace/ResponsePanel';
 
 const client = generateClient<Schema>();
 

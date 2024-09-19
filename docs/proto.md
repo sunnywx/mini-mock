@@ -4,6 +4,10 @@ idea
 schema(编排) -> endpoint
 
 
+## 层级
+
+project -> collection -> endpoints
+
 ## Refs
 
 - https://mswjs.io/docs/getting-started
