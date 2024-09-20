@@ -9,6 +9,7 @@ import Link from "next/link";
 import cs from "classnames";
 import { useRouter } from "next/router";
 import { Authenticator } from "@aws-amplify/ui-react";
+import {useUpdateEffect} from 'react-use'
 
 interface Props {
   children: ReactNode;
@@ -21,19 +22,32 @@ type LinkItem = {
   hide?: boolean;
 };
 
-const navLinks: LinkItem[] = [];
+const navLinks: LinkItem[] = [
+  {
+    name: 'Projects',
+    url: '/'
+  },
+  {
+    name: 'Schema Builder',
+    url: '/builder'
+  },
+  {
+    name: 'Http tester',
+    url: '/http-tester'
+  }
+];
 
 function TopNav({ signOut, user }: { signOut: any; user: any }) {
   const router = useRouter();
   const [activeUrl, setActiveUrl] = useState("/");
 
-  // useEffect(() => {
-  //   setActiveUrl(location.pathname);
-  // }, []);
+  useEffect(() => {
+    setActiveUrl(location.pathname);
+  }, []);
 
-  // useUpdateEffect(() => {
-  //   setActiveUrl(router.pathname);
-  // }, [router.pathname]);
+  useUpdateEffect(() => {
+    setActiveUrl(router.pathname);
+  }, [router.pathname]);
 
   return (
     <>
