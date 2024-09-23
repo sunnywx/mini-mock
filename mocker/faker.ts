@@ -182,8 +182,8 @@ const test2=`
   }
 }}`
 
-const fakeData = generateFakeData(JSON.parse(swaggerJson).definitions.User);
-console.log(JSON.stringify(fakeData, null, 2));
+// const fakeData = generateFakeData(JSON.parse(swaggerJson).definitions.User);
+// console.log(JSON.stringify(fakeData, null, 2));
 
 // const fake=generateFakeData(JSON.parse(test2).User)
 // console.log(JSON.stringify(fake, null, 2))

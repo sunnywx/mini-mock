@@ -75,10 +75,10 @@ const SchemaBuilder = () => {
       <div className="p-4">
         <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block mb-2">Schema/Model Type</label>
-            <select {...methods.register("type")}>
+            <label className="block mb-2">Define Schema Model (Object)</label>
+            {/* <select {...methods.register("type")}>
               <option value="object">Object</option>
-            </select>
+            </select> */}
           </div>
 
           <Fields />
