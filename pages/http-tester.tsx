@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { Schema } from "@/amplify/data/resource";
+// import type { Schema } from "@/amplify/data/resource";
 
 import Layout from '@/components/postman/Layout';
 import Request from '@/components/postman/Workspace/RequestPanel';

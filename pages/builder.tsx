@@ -1,96 +1,132 @@
-import React, { useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
-import { PlusCircle, Trash2 } from 'lucide-react';
-import {Button, TextField, Select, TextArea} from '@radix-ui/themes'
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useForm,
+  FormProvider,
+} from "react-hook-form";
+import { Button } from "@radix-ui/themes";
+import { Fields } from "@/components/schema-builder";
+import { generateFakeData } from "@/mocker/faker";
 
 const SchemaBuilder = () => {
-  const { register, control, handleSubmit, watch } = useForm({
+  const methods = useForm({
     defaultValues: {
-      type: 'object',
-      properties: [{ key: '', type: 'string' }],
+      type: "object",
+      properties: [],
     },
+    // shouldUnregister: true
   });
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'properties',
-  });
-  const [schema, setSchema] = useState({});
 
-  const onSubmit = (data) => {
-    const properties = data.properties.reduce((acc, prop) => {
+  const [result, setResult] = useState("");
+  const [fakeResult, setFakeResult] = useState("");
+
+  const generateSchema = (props) => {
+    return props.reduce((acc, prop) => {
+      if (!prop.key) return acc;
+
       acc[prop.key] = { type: prop.type };
-      if (prop.format) acc[prop.key].format = prop.format;
-      if (prop.description) acc[prop.key].description = prop.description;
-      if (prop.example) acc[prop.key].example = prop.example;
+      if (prop.format) {
+        acc[prop.key].format = prop.format;
+      }
+      if (prop.description) {
+        acc[prop.key].description = prop.description;
+      }
+      if (prop.example) {
+        acc[prop.key].example = prop.example;
+      }
+      if (prop.type === "object" && prop.properties) {
+        acc[prop.key].properties = generateSchema(prop.properties);
+      }
+      if (prop.type === "array" && prop.items && prop.items.properties) {
+        acc[prop.key].items = {
+          type: "object",
+          properties: generateSchema(prop.items.properties),
+        };
+      }
       return acc;
     }, {});
+  };
 
-    const newSchema = {
+  const onSubmit = (data) => {
+    const schema = {
       type: data.type,
-      properties,
+      properties: generateSchema(data.properties),
     };
 
-    setSchema(newSchema);
+    setResult(JSON.stringify(schema, null, 2));
+  };
+
+  const genMock = () => {
+    const values = methods.getValues();
+
+    const schema = {
+      type: values.type,
+      properties: generateSchema(values.properties),
+    };
+
+    const fake = generateFakeData(schema);
+
+    console.log("gen schema, fake: ", schema, fake);
+
+    setFakeResult(JSON.stringify(fake, null, 2));
   };
 
   return (
-    <div className="p-4">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label className="block mb-2">Schema Type</label>
-          <select {...register('type')}>
-            <option value="object">Object</option>
-            <option value="array">Array</option>
-          </select>
-        </div>
-        
-        <div>
-          <label className="block mb-2">Properties</label>
-          {fields.map((field, index) => (
-            <div key={field.id} className="flex space-x-2 mb-2">
-              <input {...register(`properties.${index}.key`)} placeholder="Key" />
-              <select {...register(`properties.${index}.type`)}>
-                <option value="string">String</option>
-                <option value="integer">Integer</option>
-                <option value="number">Number</option>
-                <option value="boolean">Boolean</option>
-                {/* <option value="undefined">Undefined</option> */}
-                <option value="null">Null</option>
-                <option value="object">Object</option>
-                <option value="array">Array</option>
-              </select>
-              <input {...register(`properties.${index}.format`)} placeholder="Format" />
-              <input {...register(`properties.${index}.description`)} placeholder="Description" />
-              <input {...register(`properties.${index}.example`)} placeholder="Example" />
-              <Button type="button" onClick={() => remove(index)} variant="destructive">
-                <Trash2 className="h-4 w-4" />
-              </Button>
+    <FormProvider {...methods}>
+      <div className="p-4">
+        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <label className="block mb-2">Schema/Model Type</label>
+            <select {...methods.register("type")}>
+              <option value="object">Object</option>
+            </select>
+          </div>
+
+          <Fields />
+
+          <div className="w-1/2">
+            <Button
+              variant="solid"
+              type="button"
+              style={{ height: "32px" }}
+              onClick={genMock}
+            >
+              Generate Mock
+            </Button>
+            <textarea
+              name="result-mock"
+              rows={8}
+              className="block w-full min-h-[400px] mt-2"
+              value={fakeResult}
+              onChange={() => {}}
+            />
+          </div>
+
+          {/* <div className="w-3/5 grid grid-cols-2 gap-4">
+            <div>
+              <Button variant='ghost' style={{height: '32px'}}>Generate Schema</Button>
+              <textarea
+                name="result"
+                rows={8}
+                className="block w-full min-h-[400px] mt-2"
+                value={result}
+                onChange={() => {}}
+              />
             </div>
-          ))}
-          <Button
-            type="button"
-            onClick={() => append({ key: '', type: 'string' })}
-            className="mt-2"
-          >
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Add Property
-          </Button>
-        </div>
-        
-        <Button type="submit">Generate Schema</Button>
-      </form>
-      
-      {Object.keys(schema).length > 0 && (
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold mb-2">Generated Schema:</h3>
-          <textarea
-            value={JSON.stringify(schema, null, 2)}
-            readOnly
-            className="w-full h-64"
-          />
-        </div>
-      )}
-    </div>
+
+            <div>
+              <Button variant="solid" type='button' style={{height: '32px'}} onClick={genMock}>Generate Mock</Button>
+              <textarea
+                name="result-mock"
+                rows={8}
+                className="block w-full min-h-[400px] mt-2"
+                value={fakeResult}
+                onChange={() => {}}
+              />
+            </div>
+          </div> */}
+        </form>
+      </div>
+    </FormProvider>
   );
 };
 
