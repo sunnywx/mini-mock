@@ -65,7 +65,7 @@ const SchemaBuilder = () => {
 
     const fake = generateFakeData(schema);
 
-    console.log("gen schema, fake: ", schema, fake);
+    console.log("gen: raw values, schema, fake: ", values, schema, fake);
 
     setFakeResult(JSON.stringify(fake, null, 2));
   };

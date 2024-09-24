@@ -5,7 +5,6 @@ import {
   useFormContext,
 } from "react-hook-form";
 import { PlusCircle, Trash2 } from "lucide-react";
-// import { Button } from "@radix-ui/themes";
 import { IconBtn } from "@/components/ui";
 import {emitter} from './emitter'
 
@@ -27,12 +26,17 @@ export const Field = ({
   const { register, setValue, watch } = useFormContext();
 
   const curFields = watch(nestIndex);
+  const watchType=watch(`${nestIndex}.${index}.type`)
+
+  useEffect(()=> {
+    console.log('change type: ', watchType)
+  }, [watchType])
 
   const addSubProperty = (index, type) => {
     // const newProperty = { key: "", type: "string" };
+    const prev = curFields[index];
 
     if (type === "object") {
-      const prev = curFields[index];
       const props = prev?.properties || [];
 
       setValue(
@@ -50,6 +54,18 @@ export const Field = ({
       //   ...fields[index],
       //   items: { type: "object", properties: [newProperty] },
       // });
+      const items = prev?.items || [];
+
+      setValue(
+        `${nestIndex}.${index}`,
+        {
+          ...prev,
+          items: [...items],
+        },
+        {
+          shouldValidate: true,
+        }
+      );
     }
   };
 
@@ -72,14 +88,25 @@ export const Field = ({
               <>
                 <select
                   onChange={(e) => {
+                    const prevType=field.value
                     const type = e.target.value;
                     field.onChange(type);
-                    // when changed to primitive type, reset all sub fields
-                    if (!["object", "array"].includes(type)) {
-                      emitter.emit(
-                        "reset-sub-fields",
-                        `${nestIndex}.${index}.properties`
-                      );
+
+                    if(prevType !== type){
+                      // reset all sub fields
+                      if(prevType === 'object'){
+                        emitter.emit(
+                          "reset-sub-fields",
+                          `${nestIndex}.${index}.properties`
+                        );
+                      }
+
+                      if(prevType === 'array'){
+                        emitter.emit(
+                          "reset-sub-fields",
+                          `${nestIndex}.${index}.items`
+                        );
+                      }
                     }
                   }}
                   value={field.value}
@@ -109,17 +136,17 @@ export const Field = ({
                 ) : (
                   <IconBtn
                     onClick={() => {
-                      addSubProperty(index, field.value);
+                      addSubProperty(index, type);
                       setTimeout(() => {
                         emitter.emit(
                           "add-field",
-                          `${nestIndex}.${index}.properties`
+                          `${nestIndex}.${index}.${type === 'object' ? 'properties' : 'items'}`
                         );
                       }, 0);
                     }}
                   >
                     <PlusCircle className="h-4 w-4 mr-1" />
-                    Add sub field
+                    {type === 'object' ? 'Add object field' : 'Add array item'}
                   </IconBtn>
                 )}
               </>
@@ -137,12 +164,19 @@ export const Field = ({
         // shouldUnregister
         render={({ field }) => {
           // console.log('when control field change: ', field)
-          const { type, properties } = field.value;
+          const { type, properties, items } = field.value;
 
           if (type === "object" && Array.isArray(properties)) {
             return (
               <div className="ml-4">
                 <Fields nestIndex={`${nestIndex}.${index}.properties`} />
+              </div>
+            );
+          }
+          if(type === 'array' && Array.isArray(items)){
+            return (
+              <div className="ml-4">
+                <Fields nestIndex={`${nestIndex}.${index}.items`} />
               </div>
             );
           }
@@ -154,16 +188,21 @@ export const Field = ({
 };
 
 export const Fields = ({ nestIndex = "properties" }) => {
-  const { control } = useFormContext();
+  const { control, setValue, watch } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
     name: nestIndex,
   });
+  const curFields=watch(nestIndex)
 
   const level = useMemo(
     () => nestIndex.split(".").filter((v) => v === "properties").length,
     [nestIndex]
   );
+
+  const isArrayField=useMemo(()=> {
+    return nestIndex.split(".").filter((v) => v === "items").length > 0
+  }, [nestIndex])
 
   useEffect(() => {
     emitter.on("add-field", (pathKey: string) => {
@@ -177,6 +216,27 @@ export const Fields = ({ nestIndex = "properties" }) => {
       // when cur field type changed to primitive, reset all sub fields
       if (pathKey === nestIndex) {
         remove(); // remove all fields
+
+        const idx=nestIndex.lastIndexOf('.')
+        const parentKey=nestIndex.slice(0, idx)
+        const lastKey=nestIndex.slice(idx + 1)
+        const parentFields=watch(parentKey)
+
+        if(lastKey === 'properties'){
+          delete parentFields.properties
+        } else if(lastKey === 'items'){
+          delete parentFields.items
+        }
+
+        setValue(
+          parentKey,
+          {
+            ...parentFields,
+          },
+          {
+            shouldValidate: true,
+          }
+        );
       }
     });
 
@@ -197,7 +257,7 @@ export const Fields = ({ nestIndex = "properties" }) => {
         />
       ))}
 
-      {level === 1 && (
+      {(level === 1 && !isArrayField) && (
         <IconBtn onClick={() => append({ key: "", type: "string" })}>
           <PlusCircle className="h-4 w-4 mr-1" />
           Add field

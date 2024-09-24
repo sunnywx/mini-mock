@@ -65,7 +65,7 @@ export function generateFakeData(schema: Model): any {
           break;
         case 'array':
           const itemsSchema = (propSchema as Model).items || {};
-          result[prop] = Array.from({ length: propSchema.maxItems || 3 }, () => generateFakeData(itemsSchema));
+          result[prop] = Array.from({ length: propSchema.maxItems || 1 }, () => generateFakeData(itemsSchema));
           break;
         case 'object':
           result[prop] = generateFakeData(propSchema as Model);
@@ -77,7 +77,7 @@ export function generateFakeData(schema: Model): any {
   if(schema.type === ValidType.array){
     // array model
     const items = schema.items || {};
-    return Array.from({ length: schema.maxItems || 3 }, () => generateFakeData(items))
+    return Array.from({ length: schema.maxItems || 1 }, () => generateFakeData(items))
   }
 
   if(typeof schema['$ref'] === 'string'){
