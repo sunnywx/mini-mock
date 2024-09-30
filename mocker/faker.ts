@@ -3,13 +3,39 @@
 import {faker} from '@faker-js/faker'
 import {Model, SwaggerSchema, ValidType, Field} from './types'
 
+function genString(m: Model & {type: ValidType.string}){
+  const {type, example, format}=m
+  if(example){
+    return example
+  }
+  let res=''
+  switch(format){
+    case 'data':
+      res=faker.date.recent().toISOString();
+      break;
+    case 'email':
+      res=faker.internet.email();
+      break;
+    case 'uuid':
+      res=faker.string.uuid();
+      break;
+    case 'username':
+      res=faker.person.fullName();
+      break;
+    default:
+      res=faker.lorem.words(3);
+      break;
+  }
+  return res
+}
+
 export function generateFakeData(schema: Model): any {
   const result = {};
 
   // handle primitive types
   if(schema.type === ValidType.string) {
     // string model
-    return faker.lorem.words(3)
+    return genString(schema)
   }
 
   if(schema.type === ValidType.boolean){
@@ -34,25 +60,7 @@ export function generateFakeData(schema: Model): any {
   
       switch (propType) {
         case 'string':
-          const format = propSchema.format || '';
-          if('example' in propSchema){
-            result[prop] = propSchema.example;
-            break
-          }
-
-          // todo: add more format
-          if (format === 'date') {
-            result[prop] = faker.date.recent().toISOString();
-          } else if (format === 'email') {
-            result[prop] = faker.internet.email();
-          } else if (format === 'uuid') {
-            result[prop] = faker.string.uuid();
-          } else if(format === 'username'){
-            result[prop] = faker.person.fullName();
-          } else {
-            // fallback to normal string
-            result[prop] = faker.lorem.words(5);
-          }
+          result[prop]=genString(propSchema);
           break;
         case 'integer':
           result[prop] = faker.number.int({ min: 0, max: 1000 });

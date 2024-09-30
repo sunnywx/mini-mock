@@ -9,6 +9,7 @@ import "@aws-amplify/ui-react/styles.css";
 import Layout from "@/components/app-layout";
 import { Theme } from "@radix-ui/themes";
 import axios from 'axios'
+import {Toaster} from 'react-hot-toast'
 
 const updateEndTime = (response: any) => {
   response.customData = response.customData || {};
@@ -35,6 +36,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <Layout>
         <Component {...pageProps} />
       </Layout>
+      <Toaster />
     </Theme>
   );
 }

@@ -7,6 +7,7 @@ import {
 import { PlusCircle, Trash2 } from "lucide-react";
 import { IconBtn } from "@/components/ui";
 import {emitter} from './emitter'
+import {toast} from 'react-hot-toast'
 
 interface FieldProps {
   field: any;
@@ -28,9 +29,9 @@ export const Field = ({
   const curFields = watch(nestIndex);
   const watchType=watch(`${nestIndex}.${index}.type`)
 
-  useEffect(()=> {
-    console.log('change type: ', watchType)
-  }, [watchType])
+  // useEffect(()=> {
+  //   console.log('change type: ', watchType)
+  // }, [watchType])
 
   const addSubProperty = (index, type) => {
     // const newProperty = { key: "", type: "string" };
@@ -50,11 +51,12 @@ export const Field = ({
         }
       );
     } else if (type === "array") {
-      // update(index, {
-      //   ...fields[index],
-      //   items: { type: "object", properties: [newProperty] },
-      // });
       const items = prev?.items || [];
+
+      if(items.length > 0){
+        toast.error('Array accept only one item definition')
+        return
+      }
 
       setValue(
         `${nestIndex}.${index}`,
@@ -67,6 +69,14 @@ export const Field = ({
         }
       );
     }
+
+    // notify sub fields component append item
+    setTimeout(() => {
+      emitter.emit(
+        "add-field",
+        `${nestIndex}.${index}.${type === 'object' ? 'properties' : 'items'}`
+      );
+    }, 0);
   };
 
   return (
@@ -79,6 +89,11 @@ export const Field = ({
           {...register(`${nestIndex}.${index}.key`)}
           placeholder="Name"
           className="w-[120px]"
+        />
+        <input
+          {...register(`${nestIndex}.${index}.description`)}
+          placeholder="Description"
+          className="w-[220px]"
         />
         <Controller
           name={`${nestIndex}.${index}.type`}
@@ -127,22 +142,16 @@ export const Field = ({
                       placeholder="Example value"
                       className="w-[120px]"
                     />
-                    <input
+                    {type === 'string' && <input
                       {...register(`${nestIndex}.${index}.format`)}
                       placeholder="Format (optional)"
                       className="w-[140px]"
-                    />
+                    />}
                   </>
                 ) : (
                   <IconBtn
                     onClick={() => {
                       addSubProperty(index, type);
-                      setTimeout(() => {
-                        emitter.emit(
-                          "add-field",
-                          `${nestIndex}.${index}.${type === 'object' ? 'properties' : 'items'}`
-                        );
-                      }, 0);
                     }}
                   >
                     <PlusCircle className="h-4 w-4 mr-1" />
@@ -193,16 +202,20 @@ export const Fields = ({ nestIndex = "properties" }) => {
     control,
     name: nestIndex,
   });
-  const curFields=watch(nestIndex)
+  // const curFields=watch(nestIndex)
 
   const level = useMemo(
-    () => nestIndex.split(".").filter((v) => v === "properties").length,
+    () => nestIndex.split(".").filter((v) => v === "properties" || v === 'items').length,
     [nestIndex]
   );
 
   const isArrayField=useMemo(()=> {
     return nestIndex.split(".").filter((v) => v === "items").length > 0
   }, [nestIndex])
+
+  useEffect(()=> {
+    console.log('nestIndex, level, is-array: ', nestIndex, level, isArrayField)
+  }, [level, isArrayField, nestIndex])
 
   useEffect(() => {
     emitter.on("add-field", (pathKey: string) => {
