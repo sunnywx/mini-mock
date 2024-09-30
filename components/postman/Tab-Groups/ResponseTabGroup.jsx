@@ -29,7 +29,7 @@ export default function ResponseTabGroup({ doc, setDoc, response, loading }) {
           ))}
         </TabList>
        
-        <div className="px-4 py-4 rounded-b-lg border border-t-0 border-gray-300">
+        <div className="px-4 py-4 rounded-b-lg border border-t-0 border-gray-300 max-h-[600px] overflow-auto">
         {loading ? ( 
         <ThreeDots 
           height="30"

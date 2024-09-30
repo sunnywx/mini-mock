@@ -1,18 +1,15 @@
 import {
   Flex,
-  Box,
   Text,
-  DropdownMenu,
   Button,
-  Avatar,
 } from "@radix-ui/themes";
 import { ReactNode, useEffect, useMemo, useState } from "react";
-import { useUpdateEffect } from "react-use";
 import styles from "./styles.module.scss";
 import Link from "next/link";
 import cs from "classnames";
 import { useRouter } from "next/router";
 import { Authenticator } from "@aws-amplify/ui-react";
+import {useUpdateEffect} from 'react-use'
 
 interface Props {
   children: ReactNode;
@@ -25,7 +22,20 @@ type LinkItem = {
   hide?: boolean;
 };
 
-const navLinks: LinkItem[] = [];
+const navLinks: LinkItem[] = [
+  {
+    name: 'Projects',
+    url: '/'
+  },
+  {
+    name: 'Schema Builder',
+    url: '/builder'
+  },
+  {
+    name: 'Http tester',
+    url: '/http-tester'
+  }
+];
 
 function TopNav({ signOut, user }: { signOut: any; user: any }) {
   const router = useRouter();
@@ -92,6 +102,7 @@ function TopNav({ signOut, user }: { signOut: any; user: any }) {
         <div className={styles.profile}>
           <span>{user?.signInDetails?.loginId}</span>
           <Button
+            variant="ghost"
             className={styles.userInfo}
             style={{ display: "flex", alignItems: "center" }}
             onClick={signOut}
@@ -111,20 +122,15 @@ function TopNav({ signOut, user }: { signOut: any; user: any }) {
 }
 
 export default function Layout({ children }: Props) {
-  // const [auth, setAuth] = useState<any>(null);
-
   return (
-    <Flex align="center" direction="column" className={styles.homePage}>
+    <Flex align="center" direction="column" className={styles.page}>
       <Authenticator>
         {({ signOut, user }) => (
           <>
             <TopNav signOut={signOut} user={user} />
-            <Box
-              width="100%"
-              // style={{height: 'calc(100vh - var(--app-header-h))'}}
-            >
+            <div className={styles.cont}>
               {children}
-            </Box>
+            </div>
           </>
         )}
       </Authenticator>

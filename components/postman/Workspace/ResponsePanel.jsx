@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import prettyBytes from 'pretty-bytes';
 
-import ResponseTabGroup from '../../Tab-Groups/ResponseTabGroup';
+import ResponseTabGroup from '../Tab-Groups/ResponseTabGroup';
 
 export default function Response({ response, loading }) {
   const [doc, setDoc] = useState('{}');
@@ -38,10 +38,10 @@ export default function Response({ response, loading }) {
   }
   const RenderedResponseMeta = () => {
     return (
-      <div className="flex mt-3">
-        <span className='w-28'>Status: {status}</span>
-        <span className='w-24'>Time: {time}</span>
-        <span className='w-24'>Size: {size}</span>
+      <div className="flex mt-3 gap-4">
+        <span>Status: {status}</span>
+        <span>Time: {time} ms</span>
+        <span>Size: {size}</span>
       </div>
     );
   };
